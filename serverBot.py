@@ -56,7 +56,7 @@ def define_options():
     options = parser.parse_args()
     return options
 
-def periodic_check():
+def periodic_check_warning():
     while True:
         status, message = checkServerWarning()
         if status == True:
@@ -64,6 +64,10 @@ def periodic_check():
             send_message(message)
 
         logToFile("./logs/periodic_check.log", 'status: {status}\nmessage:\n{message}'.format(status='ERROR' if status else 'OK', message=message))
+        time.sleep(120)
+
+def periodic_check_session():
+    while True:
         time.sleep(120)
 
 class ServerBotHandler(dingtalk_stream.ChatbotHandler):
@@ -87,11 +91,9 @@ Commands:
         elif "status" in incoming_message_str:
             response = getInfoMessage()
         elif "startup" in incoming_message_str:
-            startUpServer()
-            response = "OK."
+            response = startUpServer()
         elif "shutdown" in incoming_message_str:
-            shutDownServer()
-            response = "OK."
+            response = shutDownServer()
         else:
             response = "Give me \"help\" to get commands."
 
@@ -107,7 +109,10 @@ def main():
     initWebhook(options.webhook, options.client_secret, options.atUserPhone)
     initOperator(options.host, options.user, options.password, options.temperatureLimit, options.powerLimit)
 
-    thread = threading.Thread(target=periodic_check)
+    thread = threading.Thread(target=periodic_check_warning)
+    thread.start()
+
+    thread = threading.Thread(target=periodic_check_session)
     thread.start()
 
     client = dingtalk_stream.DingTalkStreamClient(credential)

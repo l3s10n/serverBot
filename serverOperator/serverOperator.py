@@ -32,10 +32,13 @@ def login():
         'password': password
     }
 
-    response = session.post('https://{host}/data/login'.format(host=host), headers=headers, data=data, verify=False)
-    if "ST1=" in response.text and "ST2=" in response.text:
+    try:
+        response = session.post('https://{host}/data/login'.format(host=host), headers=headers, data=data, verify=False)
         match = re.search(r"ST1=([^,]+),ST2=([^<]+)", response.text)
         ST1, ST2 = match.groups()
+        return "OK"
+    except:
+        return None
 
 def logout():
     global host, session
@@ -45,7 +48,11 @@ def logout():
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.58'
     }
 
-    session.get('https://{host}/data/logout'.format(host=host), headers=headers, verify=False)
+    try:
+        session.get('https://{host}/data/logout'.format(host=host), headers=headers, verify=False)
+        return "OK"
+    except:
+        return None
 
 def isPowerUp():
     global host, session, ST1, ST2
@@ -60,12 +67,12 @@ def isPowerUp():
         'get': 'pwState',
     }
 
-    response = session.post('https://192.168.1.151/data', params=params, headers=headers, verify=False)
-    if "<pwState>" in response.text and "</pwState>" in response.text:
+    try:
+        response = session.post('https://192.168.1.151/data', params=params, headers=headers, verify=False)
         match = re.search(r"<pwState>(\d*)</pwState>", response.text)
         isPowerUp = True if '1' in match.groups()[0] else False
         return isPowerUp
-    else:
+    except:
         return None
 
 def getPowerMonitorData():
@@ -84,18 +91,17 @@ def getPowerMonitorData():
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.58'
     }
 
-    response = session.post(
-        'https://{host}/data?get=powermonitordata'.format(host=host),
-        cookies=cookies,
-        headers=headers,
-        verify=False,
-    )
-
-    if "<reading>" in response.text and "</reading>" in response.text:
+    try:
+        response = session.post(
+            'https://{host}/data?get=powermonitordata'.format(host=host),
+            cookies=cookies,
+            headers=headers,
+            verify=False,
+        )
         match = re.search(r"<reading>(\d*)</reading>", response.text)
         power = int(match.groups()[0])
         return power
-    else:
+    except:
         return None
 
 def getCPUandIOandMEMUsage():
@@ -115,13 +121,12 @@ def getCPUandIOandMEMUsage():
         'idracAutoRefresh': '1',
     }
 
-    response = session.get(
-        'https://{host}/sysmgmt/2013/server/sensor/performance/outofband'.format(host=host),
-        headers=headers,
-        verify=False,
-    )
-
     try:
+        response = session.get(
+            'https://{host}/sysmgmt/2013/server/sensor/performance/outofband'.format(host=host),
+            headers=headers,
+            verify=False,
+        )
         jsonData = response.json()
         CPUUsage = jsonData['UsageInfo']['iDRAC.Embedded.1#SystemBoardCPUUsage']['current_reading']
         IOUsage = jsonData['UsageInfo']['iDRAC.Embedded.1#SystemBoardIOUsage']['current_reading']
@@ -196,7 +201,11 @@ def RequestShutDownServer():
         'sec-ch-ua-platform': '"Windows"',
     }
 
-    session.post('https://192.168.1.151/data?set=pwState:0', headers=headers, verify=False)
+    try:
+        session.post('https://192.168.1.151/data?set=pwState:0', headers=headers, verify=False)
+        return "OK"
+    except:
+        return None
 
 def RequestStartUpServer():
     global session, ST2
@@ -218,85 +227,113 @@ def RequestStartUpServer():
         'sec-ch-ua-platform': '"Windows"',
     }
 
-    session.post('https://192.168.1.151/data?set=pwState:1', headers=headers, verify=False)
+    try:
+        session.post('https://192.168.1.151/data?set=pwState:1', headers=headers, verify=False)
+        return "OK"
+    except:
+        return None
 
 def getInfoMessage():
     dealSSL()
-    login()
-    isPowerUpRes = isPowerUp()
-    if isPowerUpRes == True:
-        power = getPowerMonitorData() if getPowerMonitorData() != None else 'NA (set by serverBot)'
-        power = "NA (set by serverBot)" if power == None else power
+    loginRes = login()
+    if loginRes != None:
+        isPowerUpRes = isPowerUp()
+        if isPowerUpRes != None and isPowerUpRes == True:
+            power = getPowerMonitorData() if getPowerMonitorData() != None else 'NA (set by serverBot)'
+            power = "NA (set by serverBot)" if power == None else power
 
-        CPUUsage, IOUsage, MEMUsage = getCPUandIOandMEMUsage()
-        CPUUsage = "NA (set by serverBot)" if CPUUsage == None else CPUUsage
-        IOUsage = "NA (set by serverBot)" if IOUsage == None else IOUsage
-        MEMUsage = "NA (set by serverBot)" if MEMUsage == None else MEMUsage
+            CPUUsage, IOUsage, MEMUsage = getCPUandIOandMEMUsage()
+            CPUUsage = "NA (set by serverBot)" if CPUUsage == None else CPUUsage
+            IOUsage = "NA (set by serverBot)" if IOUsage == None else IOUsage
+            MEMUsage = "NA (set by serverBot)" if MEMUsage == None else MEMUsage
 
-        CPU1Temp, CPU2Temp, systemBoardExhaustTemp, systemBoardInletTemp = getTemperature()
-        CPU1Temp = "NA (set by serverBot)" if CPU1Temp == None else CPU1Temp
-        CPU2Temp = "NA (set by serverBot)" if CPU2Temp == None else CPU2Temp
-        systemBoardExhaustTemp = "NA (set by serverBot)" if systemBoardExhaustTemp == None else systemBoardExhaustTemp
-        systemBoardInletTemp = "NA (set by serverBot)" if systemBoardInletTemp == None else systemBoardInletTemp
-        
-        message = prettyPrint(power, CPUUsage, IOUsage, MEMUsage, CPU1Temp, CPU2Temp, systemBoardExhaustTemp, systemBoardInletTemp)
-    elif isPowerUpRes == False:
-        message = "Server is shutdown."
+            CPU1Temp, CPU2Temp, systemBoardExhaustTemp, systemBoardInletTemp = getTemperature()
+            CPU1Temp = "NA (set by serverBot)" if CPU1Temp == None else CPU1Temp
+            CPU2Temp = "NA (set by serverBot)" if CPU2Temp == None else CPU2Temp
+            systemBoardExhaustTemp = "NA (set by serverBot)" if systemBoardExhaustTemp == None else systemBoardExhaustTemp
+            systemBoardInletTemp = "NA (set by serverBot)" if systemBoardInletTemp == None else systemBoardInletTemp
+            
+            message = prettyPrint(power, CPUUsage, IOUsage, MEMUsage, CPU1Temp, CPU2Temp, systemBoardExhaustTemp, systemBoardInletTemp)
+        elif isPowerUpRes != None and isPowerUpRes == False:
+            message = "Server is shutdown."
+        else:
+            message = "Get isPowerUp failed."
+
+        logout_thread = threading.Thread(target=logout)
+        logout_thread.start()
     else:
-        message = "Get isPowerUp Error."
+        message = "Login failed."
 
-    logout_thread = threading.Thread(target=logout)
-    logout_thread.start()
+    return message
 
+def startUpServer():
+    dealSSL()
+    loginRes = login()
+    if loginRes != None:
+        requestStartUpServerRes = RequestStartUpServer()
+        if requestStartUpServerRes != None:
+            message = "OK"
+        else:
+            message = "Request for startup server failed."
+
+        logout_thread = threading.Thread(target=logout)
+        logout_thread.start()
+    else:
+        message = "Login failed."
+    
     return message
 
 def shutDownServer():
     dealSSL()
-    login()
-    RequestShutDownServer()
+    loginRes = login()
+    if loginRes != None:
+        requestShutDownServer = RequestShutDownServer()
+        if requestShutDownServer != None:
+            message = "OK"
+        else:
+            message = "Request for shutdown server failed."
 
-    logout_thread = threading.Thread(target=logout)
-    logout_thread.start()
-
-def startUpServer():
-    dealSSL()
-    login()
-    RequestStartUpServer()
-
-    logout_thread = threading.Thread(target=logout)
-    logout_thread.start()
+        logout_thread = threading.Thread(target=logout)
+        logout_thread.start()
+    else:
+        message = "Login failed."
+    return message
 
 def checkServerWarning():
     global temperatureLimit, powerLimit
     
     dealSSL()
-    login()
-    status = False
-    message = ""
-    isPowerUpRes = isPowerUp()
-    if isPowerUpRes == True:
-        CPU1Temp, CPU2Temp, systemBoardExhaustTemp, systemBoardInletTemp = getTemperature()
-        power = getPowerMonitorData()
-        
-        if CPU1Temp == None:
-            status = True
-            message = message + "TEMPRATURE WARNING: CAN NOT GET TEMPERATURE INFO"
-        elif CPU1Temp > temperatureLimit or CPU2Temp > temperatureLimit or systemBoardExhaustTemp > temperatureLimit or systemBoardInletTemp > temperatureLimit:
-            status = True
-            message = message + "TEMPRATURE WARNING: CPU1Temp {CPU1Temp}℃  CPU2Temp {CPU2Temp}℃  SystemBoardExhaustTemp {systemBoardExhaustTemp}℃  SystemBoardInletTemp {systemBoardInletTemp}℃".format(CPU1Temp=CPU1Temp, CPU2Temp=CPU2Temp, systemBoardExhaustTemp=systemBoardExhaustTemp, systemBoardInletTemp=systemBoardInletTemp)
+    loginRes = login()
+    if loginRes != None:
+        isPowerUpRes = isPowerUp()
+        if isPowerUpRes != None and isPowerUpRes == True:
+            CPU1Temp, CPU2Temp, systemBoardExhaustTemp, systemBoardInletTemp = getTemperature()
+            power = getPowerMonitorData()
+            
+            if CPU1Temp == None:
+                status = True
+                message = message + "TEMPRATURE WARNING: CAN NOT GET TEMPERATURE INFO"
+            elif CPU1Temp > temperatureLimit or CPU2Temp > temperatureLimit or systemBoardExhaustTemp > temperatureLimit or systemBoardInletTemp > temperatureLimit:
+                status = True
+                message = message + "TEMPRATURE WARNING: CPU1Temp {CPU1Temp}℃  CPU2Temp {CPU2Temp}℃  SystemBoardExhaustTemp {systemBoardExhaustTemp}℃  SystemBoardInletTemp {systemBoardInletTemp}℃".format(CPU1Temp=CPU1Temp, CPU2Temp=CPU2Temp, systemBoardExhaustTemp=systemBoardExhaustTemp, systemBoardInletTemp=systemBoardInletTemp)
 
-        if power == None:
+            if power == None:
+                status = True
+                message = "POWER WARNING: CAN NOT GET POWER STATUS" if message == "" else message + "\nPOWER WARNING: CAN NOT GET POWER STATUS"
+            elif power > powerLimit:
+                status = True
+                message = "POWER WARNING: POWER {power}W" if message == "" else message + "\nPOWER WARNING: POWER {power}W".format(power=power)
+        elif isPowerUpRes != None and isPowerUpRes == False:
+            status = False
+            message = ""
+        else:
             status = True
-            message = "POWER WARNING: CAN NOT GET POWER STATUS" if message == "" else message + "\nPOWER WARNING: CAN NOT GET POWER STATUS"
-        elif power > powerLimit:
-            status = True
-            message = "POWER WARNING: POWER {power}W" if message == "" else message + "\nPOWER WARNING: POWER {power}W".format(power=power)
-        
-    elif isPowerUpRes == None:
+            message = "Get isPowerUp failed while check."
+
+        logout_thread = threading.Thread(target=logout)
+        logout_thread.start()
+    else:
         status = True
-        message = "ISPOWERUP WARNING: CAN NOT GET ISPOWERUP STATUS"
-
-    logout_thread = threading.Thread(target=logout)
-    logout_thread.start()
+        message = "Login failed while check."
     
     return status, message
