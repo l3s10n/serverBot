@@ -17,30 +17,30 @@ pip install -r requirements.txt
 需要自行准备好钉钉机器人的client_id、client_secret、webhook，需要在dirac上为钉钉机器人添加具有上述操作权限的专用账号。执行下面的命令开启服务：
 
 ```python
-python3 serverBot.py 
---host '<idrac地址>' 
---user '<idrac账户用户名>' 
---password '<idrac账户密码>' 
---client_id '<client_id>' 
---client_secret '<client_secret>' 
---webhook '<webhook>' 
---atUserPhone '<钉钉用户手机号，用于@>'
---temperatureLimit <温度限制>
+python3 serverBot.py \
+--host '<idrac地址>' \
+--user '<idrac账户用户名>' \
+--password '<idrac账户密码>' \
+--client_id '<client_id>' \
+--client_secret '<client_secret>' \
+--webhook '<webhook>' \
+--atUserPhone '<钉钉用户手机号，用于@>' \
+--temperatureLimit <温度限制> \
 --powerLimit <功耗限制>
 ```
 
 使用示例：
 
 ```python
-python3 serverBot.py 
---host '192.168.8.8' 
---user 'serverBot' 
---password 'serverBotPassword' 
---client_id '123456' 
---client_secret '123456' 
---webhook 'http://webhook' 
---atUserPhone '13211111111'
---temperatureLimit 80
+python3 serverBot.py \
+--host '192.168.8.8' \
+--user 'serverBot' \
+--password 'serverBotPassword' \
+--client_id '123456' \
+--client_secret '123456' \
+--webhook 'http://webhook' \
+--atUserPhone '13211111111' \
+--temperatureLimit 80 \
 --powerLimit 500
 ```
 
