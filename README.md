@@ -56,4 +56,6 @@ python3 serverBot.py \
 * startup：打开服务器电源
 * shutdown：关闭服务器电源
 
+如`@钉钉机器人 info`查看服务器信息。
+
 当服务器温度或功耗超出阈值时，钉钉机器人会自动发送提醒。

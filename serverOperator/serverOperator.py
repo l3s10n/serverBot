@@ -58,8 +58,8 @@ def isPowerUp():
     global host, session, ST1, ST2
     
     headers = {
-        'Origin': 'https://192.168.1.151',
-        'Referer': 'https://192.168.1.151/powercontrol.html?cat=C03&tab=T08&id=P18',
+        'Origin': 'https://{host}'.format(host=host),
+        'Referer': 'https://{host}/powercontrol.html'.format(host=host),
         'ST2': ST2,
     }
 
@@ -68,7 +68,7 @@ def isPowerUp():
     }
 
     try:
-        response = session.post('https://192.168.1.151/data', params=params, headers=headers, verify=False)
+        response = session.post('https://{host}/data'.format(host=host), params=params, headers=headers, verify=False)
         match = re.search(r"<pwState>(\d*)</pwState>", response.text)
         isPowerUp = True if '1' in match.groups()[0] else False
         return isPowerUp
@@ -182,15 +182,15 @@ systemBoardInletTemp: {systemBoardInletTemp}℃
     return prettyTemplate
 
 def RequestShutDownServer():
-    global session, ST2
+    global host, session, ST2
 
     headers = {
         'Accept': '*/*',
         'Accept-Language': 'zh-CN,zh;q=0.9',
         'Connection': 'keep-alive',
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Origin': 'https://192.168.1.151',
-        'Referer': 'https://192.168.1.151/sysSummaryData.html',
+        'Origin': 'https://{host}'.format(host=host),
+        'Referer': 'https://{host}/sysSummaryData.html'.format(host=host),
         'ST2': ST2,
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
@@ -202,21 +202,21 @@ def RequestShutDownServer():
     }
 
     try:
-        session.post('https://192.168.1.151/data?set=pwState:0', headers=headers, verify=False)
+        session.post('https://{host}/data?set=pwState:0'.format(host=host), headers=headers, verify=False)
         return "OK"
     except:
         return None
 
 def RequestStartUpServer():
-    global session, ST2
+    global host, session, ST2
 
     headers = {
         'Accept': '*/*',
         'Accept-Language': 'zh-CN,zh;q=0.9',
         'Connection': 'keep-alive',
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Origin': 'https://192.168.1.151',
-        'Referer': 'https://192.168.1.151/sysSummaryData.html',
+        'Origin': 'https://{host}'.format(host=host),
+        'Referer': 'https://{host}/sysSummaryData.html'.format(host=host),
         'ST2': ST2,
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
@@ -228,7 +228,7 @@ def RequestStartUpServer():
     }
 
     try:
-        session.post('https://192.168.1.151/data?set=pwState:1', headers=headers, verify=False)
+        session.post('https://{host}/data?set=pwState:1'.format(host=host), headers=headers, verify=False)
         return "OK"
     except:
         return None
