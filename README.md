@@ -46,10 +46,11 @@ python3 serverBot.py
 
 # 使用
 
-@钉钉机器人，通过下面的指令通过钉钉机器人完成相应任务：
+@钉钉机器人，发送下面的指令通过钉钉机器人完成相应任务：
 
 * help：查看指令
-* status：查询服务器状态
+* status：查看serverBot的运行状态
+* info: 查询服务器信息
 * startup：打开服务器电源
 * shutdown：关闭服务器电源
 

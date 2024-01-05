@@ -1,10 +1,10 @@
 # !/usr/bin/env python
 
-import argparse, dingtalk_stream, logging, time, threading
+import argparse, dingtalk_stream, logging, time, threading, datetime
 from dingtalk_stream import AckMessage
 from dingtalk_webhook.dingtalk_webhook import initWebhook, send_message
-from serverOperator.serverOperator import initOperator, getInfoMessage, startUpServer, shutDownServer, checkServerWarning
-from utils.log import logToFile
+from serverOperator.serverOperator import initOperator, getInfoMessage, startUpServer, shutDownServer, checkServer
+from utils.log import preiodic_check_log
 
 def setup_logger():
     logger = logging.getLogger()
@@ -56,21 +56,21 @@ def define_options():
     options = parser.parse_args()
     return options
 
-def periodic_check_warning():
+def periodicCheck():
+    global lastCheckTime, lastCheckMessage
     while True:
-        status, message = checkServerWarning()
+        status, message = checkServer()
         if status == True:
-            print(message)
             send_message(message)
 
-        logToFile("./logs/periodic_check.log", 'status: {status}\nmessage:\n{message}'.format(status='ERROR' if status else 'OK', message=message))
-        time.sleep(120)
-
-def periodic_check_session():
-    while True:
+        preiodic_check_log("./logs/periodic_check.log", 'status: {status}\nmessage: {message}'.format(status='ERROR' if status else 'OK', message=message))
+        lastCheckTime = datetime.datetime.now()
+        lastCheckMessage = message
         time.sleep(120)
 
 class ServerBotHandler(dingtalk_stream.ChatbotHandler):
+    global lastCheckTime, lastCheckMessage
+
     def __init__(self, logger: logging.Logger = None):
         super(dingtalk_stream.ChatbotHandler, self).__init__()
         if logger:
@@ -84,11 +84,14 @@ class ServerBotHandler(dingtalk_stream.ChatbotHandler):
             response = """
 Commands:
     help: show this help message
-    status: show server's status
+    status: check serverBot
+    info: show server's info
     startup: start up server
     shutdown: shut down server
 """.strip()
         elif "status" in incoming_message_str:
+            response = "ServerBot is running.\nLast check time: {lastCheckTime}\nLast check message: {lastCheckMessage}".format(lastCheckTime=lastCheckTime, lastCheckMessage=lastCheckMessage)
+        elif "info" in incoming_message_str:
             response = getInfoMessage()
         elif "startup" in incoming_message_str:
             response = startUpServer()
@@ -109,10 +112,7 @@ def main():
     initWebhook(options.webhook, options.client_secret, options.atUserPhone)
     initOperator(options.host, options.user, options.password, options.temperatureLimit, options.powerLimit)
 
-    thread = threading.Thread(target=periodic_check_warning)
-    thread.start()
-
-    thread = threading.Thread(target=periodic_check_session)
+    thread = threading.Thread(target=periodicCheck)
     thread.start()
 
     client = dingtalk_stream.DingTalkStreamClient(credential)

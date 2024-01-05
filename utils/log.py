@@ -1,6 +1,6 @@
 import datetime
 from utils.fileUtil import fileAppend
 
-def logToFile(filePath, content):
-    time = '\n[' + str(datetime.datetime.now()) + ']\n'
-    fileAppend(filePath, time + content)
+def preiodic_check_log(filePath, content):
+    time = '[' + str(datetime.datetime.now()) + ']\n'
+    fileAppend(filePath, time + content + '\n')

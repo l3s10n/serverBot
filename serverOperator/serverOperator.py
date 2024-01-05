@@ -299,8 +299,11 @@ def shutDownServer():
         message = "Login failed."
     return message
 
-def checkServerWarning():
+def checkServer():
     global temperatureLimit, powerLimit
+
+    status = False
+    message = "OK"
     
     dealSSL()
     loginRes = login()
@@ -323,10 +326,7 @@ def checkServerWarning():
             elif power > powerLimit:
                 status = True
                 message = "POWER WARNING: POWER {power}W" if message == "" else message + "\nPOWER WARNING: POWER {power}W".format(power=power)
-        elif isPowerUpRes != None and isPowerUpRes == False:
-            status = False
-            message = ""
-        else:
+        elif isPowerUpRes == None:
             status = True
             message = "Get isPowerUp failed while check."
 
