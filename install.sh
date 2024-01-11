@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# 拷贝项目
-TARGET_DIR="/opt/serverBot"
-mkdir -p $TARGET_DIR
-cp -r * $TARGET_DIR
-cd $TARGET_DIR
-
 # 安装依赖模块
 pip3 install -r requirements.txt
 
@@ -19,7 +13,7 @@ if [ ! -d "/etc/supervisor/conf.d" ]; then
 fi
 cat <<EOF > /etc/supervisor/conf.d/serverBot.conf
 [program:serverBot]
-command=/usr/bin/python3 $TARGET_DIR/serverBot.py
+command=/usr/bin/python3 $(pwd)/serverBot.py
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/serverBot.err.log
