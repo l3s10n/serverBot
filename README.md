@@ -2,48 +2,46 @@
 
 使用钉钉机器人通过idrac监控服务器的状态，实现以下功能：
 
-1. 通过钉钉查询服务器状态
-2. 通过钉钉开关机
-3. 设置温度与功耗的限制，超出限制钉钉提醒
+1. 通过钉钉信息查询服务器状态
+2. 通过钉钉信息开关机
+3. 设置温度与功耗的限制，超出限制自动钉钉提醒
 
 > 注：项目仅在idrac8上进行验证。
 
 # 安装
 
-```python
-pip install -r requirements.txt
+```shell
+chmod +x ./install.sh
+sudo ./install.sh
 ```
 
-# 服务搭建
+# 启动与停止
 
-需要自行准备好钉钉机器人的client_id、client_secret、webhook，需要在dirac上为钉钉机器人添加具有上述操作权限的专用账号。执行下面的命令开启服务：
+需要自行准备好钉钉机器人的client_id、client_secret、webhook，需要在dirac上为钉钉机器人添加具有上述操作权限的专用账号。然后配置conf/conf.ini，例如：
 
 ```python
-python3 serverBot.py \
---host '<idrac地址>' \
---user '<idrac账户用户名>' \
---password '<idrac账户密码>' \
---client_id '<client_id>' \
---client_secret '<client_secret>' \
---webhook '<webhook>' \
---atUserPhone '<钉钉用户手机号，用于@>' \
---temperatureLimit <温度限制> \
---powerLimit <功耗限制>
+[dingtalk]
+client_id = xxx
+client_secret = xxx
+webhook = https://xxx
+at_user_phone = 13211111111
+
+[idrac]
+host = 192.168.1.11
+user = serverBot
+password = serverBotPassword
+
+[threshold]
+temperature_limit = 80
+power_limit = 600
 ```
 
-使用示例：
+然后通过supervisorctl来控制serverBot的启动与停止：
 
-```python
-python3 serverBot.py \
---host '192.168.8.8' \
---user 'serverBot' \
---password 'serverBotPassword' \
---client_id '123456' \
---client_secret '123456' \
---webhook 'http://webhook' \
---atUserPhone '13211111111' \
---temperatureLimit 80 \
---powerLimit 500
+```shell
+supervisorctl status serverBot # 检查serverBot的状态
+supervisorctl start serverBot # 启动serverBot
+supervisorctl stop serverBot # 停止serverBot
 ```
 
 # 使用

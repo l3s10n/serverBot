@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 
-import argparse, dingtalk_stream, logging, time, threading, datetime
+import configparser, dingtalk_stream, logging, time, threading, datetime
 from dingtalk_stream import AckMessage
 from dingtalk_webhook.dingtalk_webhook import initWebhook, send_message
 from serverOperator.serverOperator import initOperator, getInfoMessage, startUpServer, shutDownServer, checkServer
@@ -16,44 +16,18 @@ def setup_logger():
     return logger
 
 def define_options():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--webhook', dest='webhook', required=True,
-        help='webhook for bot'
-    )
-    parser.add_argument(
-        '--atUserPhone', dest='atUserPhone', required=True,
-        help='user phone for warning'
-    )
-    parser.add_argument(
-        '--client_id', dest='client_id', required=True,
-        help='app_key or suite_key from https://open-dev.digntalk.com'
-    )
-    parser.add_argument(
-        '--client_secret', dest='client_secret', required=True,
-        help='app_secret or suite_secret from https://open-dev.digntalk.com'
-    )
-    parser.add_argument(
-        '--host', dest='host', required=True,
-        help='The host address of idrac'
-    )
-    parser.add_argument(
-        '--user', dest='user', required=True,
-        help='The username for idrac'
-    )
-    parser.add_argument(
-        '--password', dest='password', required=True,
-        help='The password for idrac'
-    )
-    parser.add_argument(
-        '--temperatureLimit', dest='temperatureLimit', type=int, required=True,
-        help='The temperature limit for warning'
-    )
-    parser.add_argument(
-        '--powerLimit', dest='powerLimit', type=int, required=True,
-        help='The power limit for warning'
-    )
-    options = parser.parse_args()
+    options = {}
+    config = configparser.ConfigParser()
+
+    config.read('conf/conf.ini')
+
+    for section in config.sections():
+        for key in config[section]:
+            if key in ['temperature_limit', 'power_limit']:
+                options[key] = int(config[section][key])
+            else:
+                options[key] = config[section][key]
+    
     return options
 
 def periodicCheck():
@@ -108,9 +82,9 @@ def main():
     logger = setup_logger()
     options = define_options()
 
-    credential = dingtalk_stream.Credential(options.client_id, options.client_secret)
-    initWebhook(options.webhook, options.client_secret, options.atUserPhone)
-    initOperator(options.host, options.user, options.password, options.temperatureLimit, options.powerLimit)
+    credential = dingtalk_stream.Credential(options['client_id'], options['client_secret'])
+    initWebhook(options['webhook'], options['client_secret'], options['at_user_phone'])
+    initOperator(options['host'], options['user'], options['password'], options['temperature_limit'], options['power_limit'])
 
     thread = threading.Thread(target=periodicCheck)
     thread.start()
