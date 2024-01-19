@@ -17,9 +17,9 @@ sudo ./install.sh
 
 # 启动与停止
 
-需要自行准备好钉钉机器人的client_id、client_secret、webhook，需要在dirac上为钉钉机器人添加具有上述操作权限的专用账号。然后配置conf/conf.ini，例如：
+需要自行准备好钉钉机器人的client_id、client_secret、webhook，需要在idrac上为钉钉机器人添加具有上述操作权限的专用账号。然后配置conf/conf.ini，例如：
 
-```python
+```ini
 [dingtalk]
 client_id = xxx
 client_secret = xxx
