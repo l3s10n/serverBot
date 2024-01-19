@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 
-import configparser, dingtalk_stream, logging, time, threading, datetime
+import configparser, dingtalk_stream, logging, time, threading, datetime, os
 from dingtalk_stream import AckMessage
 from dingtalk_webhook.dingtalk_webhook import initWebhook, send_message
 from serverOperator.serverOperator import initOperator, getInfoMessage, startUpServer, shutDownServer, checkServer
@@ -16,6 +16,8 @@ def setup_logger():
     return logger
 
 def define_options():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     options = {}
     config = configparser.ConfigParser()
 
