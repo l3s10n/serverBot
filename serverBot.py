@@ -42,7 +42,7 @@ def periodicCheck():
         preiodic_check_log("./logs/periodic_check.log", 'status: {status}\nmessage: {message}'.format(status='ERROR' if status else 'OK', message=message))
         lastCheckTime = datetime.datetime.now()
         lastCheckMessage = message
-        time.sleep(120)
+        time.sleep(300)
 
 class ServerBotHandler(dingtalk_stream.ChatbotHandler):
     global lastCheckTime, lastCheckMessage
