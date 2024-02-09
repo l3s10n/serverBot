@@ -15,7 +15,7 @@ chmod +x ./install.sh
 sudo ./install.sh
 ```
 
-# 启动与停止
+# 启动
 
 需要自行准备好钉钉机器人的client_id、client_secret、webhook，需要在idrac上为钉钉机器人添加具有上述操作权限的专用账号。然后配置conf/conf.ini，例如：
 
@@ -36,12 +36,10 @@ temperature_limit = 80
 power_limit = 600
 ```
 
-然后通过supervisorctl来控制serverBot的启动与停止：
+然后执行serverBot：
 
 ```shell
-supervisorctl status serverBot # 检查serverBot的状态
-supervisorctl start serverBot # 启动serverBot
-supervisorctl stop serverBot # 停止serverBot
+nohup python3 serverBot.py &
 ```
 
 # 使用

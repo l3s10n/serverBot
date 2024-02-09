@@ -37,7 +37,8 @@ def login():
         match = re.search(r"ST1=([^,]+),ST2=([^<]+)", response.text)
         ST1, ST2 = match.groups()
         return "OK"
-    except:
+    except Exception as e:
+        print(e)
         return None
 
 def logout():
